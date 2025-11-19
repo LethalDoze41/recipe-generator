@@ -19,31 +19,31 @@ exports.analyzeIngredients = onRequest((req, res) => {
   cors(req, res, async () => {
     try {
       if (!genAI) {
-        return res.status(500).json({ 
+        return res.status(500).json({
           success: false,
-          error: "Gemini API is not configured" 
+          error: "Gemini API is not configured"
         });
       }
 
       if (req.method !== "POST") {
-        return res.status(405).json({ 
+        return res.status(405).json({
           success: false,
-          error: "Method not allowed" 
+          error: "Method not allowed"
         });
       }
 
       const { imageData, mimeType } = req.body;
 
       if (!imageData) {
-        return res.status(400).json({ 
+        return res.status(400).json({
           success: false,
-          error: "Image data is required" 
+          error: "Image data is required"
         });
       }
 
       console.log("🔍 Analyzing image for ingredients...");
 
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+      const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
       const imagePart = {
         inlineData: {
@@ -72,9 +72,9 @@ Rules:
       const jsonMatch = text.match(/\[.*\]/s);
       if (jsonMatch) {
         const ingredients = JSON.parse(jsonMatch[0]);
-        return res.status(200).json({ 
-          success: true, 
-          ingredients 
+        return res.status(200).json({
+          success: true,
+          ingredients
         });
       }
 
@@ -83,16 +83,16 @@ Rules:
         .map(line => line.replace(/^[-*•\d.]\s*/, "").trim())
         .filter(line => line.length > 2);
 
-      return res.status(200).json({ 
-        success: true, 
-        ingredients 
+      return res.status(200).json({
+        success: true,
+        ingredients
       });
 
     } catch (error) {
       console.error("❌ Error analyzing image:", error);
-      return res.status(500).json({ 
-        success: false, 
-        error: error.message 
+      return res.status(500).json({
+        success: false,
+        error: error.message
       });
     }
   });
@@ -105,31 +105,31 @@ exports.generateRecipe = onRequest((req, res) => {
   cors(req, res, async () => {
     try {
       if (!genAI) {
-        return res.status(500).json({ 
+        return res.status(500).json({
           success: false,
-          error: "Gemini API is not configured" 
+          error: "Gemini API is not configured"
         });
       }
 
       if (req.method !== "POST") {
-        return res.status(405).json({ 
+        return res.status(405).json({
           success: false,
-          error: "Method not allowed" 
+          error: "Method not allowed"
         });
       }
 
       const { ingredients, preferences } = req.body;
 
       if (!ingredients || !Array.isArray(ingredients) || ingredients.length === 0) {
-        return res.status(400).json({ 
+        return res.status(400).json({
           success: false,
-          error: "Ingredients array is required" 
+          error: "Ingredients array is required"
         });
       }
 
       console.log("🍳 Generating recipe for:", ingredients);
 
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
       const prompt = `Create a detailed recipe using these ingredients and preferences:
 
@@ -195,8 +195,8 @@ Important:
       const jsonMatch = cleanedText.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         const recipe = JSON.parse(jsonMatch[0]);
-        return res.status(200).json({ 
-          success: true, 
+        return res.status(200).json({
+          success: true,
           recipe: {
             ...recipe,
             createdAt: new Date().toISOString(),
@@ -209,9 +209,9 @@ Important:
 
     } catch (error) {
       console.error("❌ Error generating recipe:", error);
-      return res.status(500).json({ 
-        success: false, 
-        error: error.message 
+      return res.status(500).json({
+        success: false,
+        error: error.message
       });
     }
   });

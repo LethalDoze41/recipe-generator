@@ -23,14 +23,14 @@ export const analyzeIngredientsFromImage = async (imageFile) => {
   try {
     console.log('🔍 Analyzing image for ingredients...');
     console.log('📦 Using model: gemini-pro-vision');
-    
-    // Use gemini-pro-vision - the stable vision model
-    const model = genAI.getGenerativeModel({ 
-      model: 'gemini-pro-vision'
+
+    // Use gemini-2.0-flash - the stable multimodal model
+    const model = genAI.getGenerativeModel({
+      model: 'gemini-2.0-flash'
     });
 
     const base64Image = await fileToBase64(imageFile);
-    
+
     const imagePart = {
       inlineData: {
         data: base64Image.split(',')[1],
@@ -70,14 +70,14 @@ Rules:
   } catch (error) {
     console.error('❌ Error analyzing image:');
     console.error('Error message:', error.message);
-    
+
     if (error.message?.includes('API_KEY_INVALID')) {
       throw new Error('Invalid Gemini API key. Please check your API key.');
     }
     if (error.message?.includes('503') || error.message?.includes('overloaded')) {
       throw new Error('Gemini AI is currently busy. Please try again in a moment.');
     }
-    
+
     throw new Error('Failed to analyze image. Please try again.');
   }
 };
@@ -93,10 +93,10 @@ export const generateRecipe = async (ingredients, preferences) => {
   try {
     console.log('🍳 Generating recipe with:', { ingredients, preferences });
     console.log('📦 Using model: gemini-pro');
-    
-    // Use gemini-pro - the stable text generation model
-    const model = genAI.getGenerativeModel({ 
-      model: 'gemini-pro'
+
+    // Use gemini-2.0-flash - the stable multimodal model
+    const model = genAI.getGenerativeModel({
+      model: 'gemini-2.0-flash'
     });
 
     const prompt = `Create a detailed recipe using these ingredients and preferences:
@@ -161,13 +161,13 @@ Important:
       .replace(/```json\n?/g, '')
       .replace(/```\n?/g, '')
       .trim();
-    
+
     // Extract JSON
     const jsonMatch = cleanedText.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
       const recipe = JSON.parse(jsonMatch[0]);
       console.log('✅ Successfully parsed recipe:', recipe.recipeName);
-      
+
       return {
         ...recipe,
         createdAt: new Date().toISOString(),
@@ -180,7 +180,7 @@ Important:
   } catch (error) {
     console.error('❌ Error generating recipe:');
     console.error('Error message:', error.message);
-    
+
     if (error.message?.includes('API_KEY_INVALID')) {
       throw new Error('Invalid Gemini API key. Please check your API key.');
     }
@@ -190,7 +190,7 @@ Important:
     if (error.message?.includes('JSON')) {
       throw new Error('Failed to parse AI response. Please try generating again.');
     }
-    
+
     throw new Error(error.message || 'Failed to generate recipe. Please try again.');
   }
 };
@@ -201,16 +201,16 @@ Important:
 export const generateRecipeVariations = async (ingredients, preferences, count = 3) => {
   try {
     const recipes = [];
-    
+
     for (let i = 0; i < count; i++) {
       const recipe = await generateRecipe(ingredients, preferences);
       recipes.push(recipe);
-      
+
       if (i < count - 1) {
         await new Promise(resolve => setTimeout(resolve, 1000));
       }
     }
-    
+
     return recipes;
   } catch (error) {
     console.error('Error generating variations:', error);
@@ -232,18 +232,18 @@ const fileToBase64 = (file) => {
 const extractIngredientsFromText = (text) => {
   const lines = text.split('\n').filter(line => line.trim());
   const ingredients = [];
-  
+
   for (const line of lines) {
     const cleaned = line
       .replace(/^[-*•]\s*/, '')
       .replace(/^\d+\.\s*/, '')
       .replace(/^ingredient:\s*/i, '')
       .trim();
-    
+
     if (cleaned && cleaned.length > 2) {
       ingredients.push(cleaned);
     }
   }
-  
+
   return ingredients;
 };
